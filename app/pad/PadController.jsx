@@ -194,7 +194,7 @@ export default function PadController({ room, transport = "lan", requestedSlot =
     const m = Math.hypot(vx, vy);
     if (m > 1) { vx /= m; vy /= m; }
     const i = input.current;
-    if (m < 0.18) { i.vx = 0; i.vy = 0; } else { i.vx = vx; i.vy = vy; }
+    if (m < 0.18) { i.vx = 0; i.vy = 0; } else { i.vx = vy; i.vy = -vx; }
   }
   function stickUp(e) {
     const s = stick.current;
