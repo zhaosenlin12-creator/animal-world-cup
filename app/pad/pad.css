@@ -1,6 +1,8 @@
-/* Phone controller page (/pad). A self-contained gamepad surface — it does NOT
+﻿/* Phone controller page (/pad). A self-contained gamepad surface — it does NOT
    share the match HUD stylesheet, so everything it needs lives here. Designed
-   for a phone held in landscape: stick bottom-left, action diamond bottom-right. */
+   for a phone held in landscape with the LEFT hand: stick top-left, action
+   diamond bottom-left, so the thumb can swing between them naturally without
+   crossing the screen. */
 
 .pad {
   position: fixed;
@@ -67,14 +69,16 @@
 }
 .pad-state--playing { background: #d6453b; color: #fff; }
 
-/* analog stick */
+/* analog stick — top-left of a landscape phone, sized by the shorter viewport
+   edge so a chunky phone and a slim one both keep a comfortable thumb target
+   without overflowing the screen. */
 .pad-stick {
   position: absolute;
   left: max(24px, env(safe-area-inset-left));
-  bottom: max(24px, env(safe-area-inset-bottom));
-  width: 40vw;
+  top: max(56px, env(safe-area-inset-top, 24px));
+  width: 30vmin;
   max-width: 200px;
-  height: 40vw;
+  height: 30vmin;
   max-height: 200px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
@@ -96,14 +100,15 @@
   pointer-events: none;
 }
 
-/* action diamond */
+/* action diamond — bottom-left, same left-edge anchor as the stick so the
+   thumb arcs straight down between them. Sized by vmin to match the stick. */
 .pad-pad {
   position: absolute;
-  right: max(24px, env(safe-area-inset-right));
+  left: max(24px, env(safe-area-inset-left));
   bottom: max(24px, env(safe-area-inset-bottom));
-  width: 46vw;
+  width: 38vmin;
   max-width: 230px;
-  height: 46vw;
+  height: 38vmin;
   max-height: 230px;
   z-index: 2;
 }
