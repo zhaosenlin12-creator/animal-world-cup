@@ -62,6 +62,7 @@ export default function OnlineRoomClient({ createMode, initialRoom, initialHost,
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
   const [origin, setOrigin] = useState("");
+  const [hostInfo, setHostInfo] = useState(null); // { ip, port } from relay hosted/joined
 
   function enterMatch(nextConfig) {
     const value = normalizeOnlineConfig(nextConfig || configRef.current || seed);
@@ -117,6 +118,7 @@ export default function OnlineRoomClient({ createMode, initialRoom, initialHost,
             setConfig(nextConfig);
             setRoster(msg.roster || EMPTY_ROSTER);
             setPadInvites(msg.padInvites || [null, null]);
+            if (msg.ip && msg.port) setHostInfo({ ip: msg.ip, port: msg.port });
             setStatus("ready");
             setError("");
             try { sessionStorage.setItem(storageKey(nextRole, code), resumeToken); } catch {}
@@ -180,10 +182,18 @@ export default function OnlineRoomClient({ createMode, initialRoom, initialHost,
     };
   }, []);
 
+  // Prefer the LAN IP that the relay advertised; fall back to whatever the
+  // host typed in the URL bar (works when the host page itself was opened via
+  // 192.168.x.x, but not when it was opened via localhost).
+  const joinOrigin = useMemo(() => {
+    if (hostInfo) return `http://${hostInfo.ip}:${hostInfo.port}`;
+    return origin;
+  }, [hostInfo, origin]);
+
   const inviteUrl = useMemo(() => {
-    if (!origin || !room) return "";
-    return `${origin}/online?room=${room}`;
-  }, [origin, room]);
+    if (!joinOrigin || !room) return "";
+    return `${joinOrigin}/online?room=${room}`;
+  }, [joinOrigin, room]);
 
   useEffect(() => {
     if (!config || config.mode !== "controllers" || !room || typeof window === "undefined") {
@@ -193,7 +203,8 @@ export default function OnlineRoomClient({ createMode, initialRoom, initialHost,
     const slot = role === "host" ? 0 : 1;
     const invite = padInvites[slot];
     if (!invite) return setPadQr(null);
-    const url = `${window.location.origin}/online-pad?room=${room}&slot=${slot}&invite=${encodeURIComponent(invite)}`;
+    const base = hostInfo ? `http://${hostInfo.ip}:${hostInfo.port}` : window.location.origin;
+    const url = `${base}/online-pad?room=${room}&slot=${slot}&invite=${encodeURIComponent(invite)}`;
     QRCode.toDataURL(url, { width: 300, margin: 1, color: { dark: "#24461f", light: "#ffffff" } })
       .then(setPadQr)
       .catch(() => setPadQr(null));

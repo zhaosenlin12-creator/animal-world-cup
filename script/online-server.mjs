@@ -1,5 +1,6 @@
 import http from "node:http";
 import { randomBytes } from "node:crypto";
+import os from "node:os";
 import { WebSocketServer } from "ws";
 import {
   ONLINE_RECONNECT_GRACE_MS,
@@ -13,6 +14,25 @@ import {
 } from "../online/shared.js";
 
 const PORT = Number(process.env.ONLINE_PORT || 13002);
+const HTTP_PORT = Number(process.env.NEXT_DEV_PORT || 13000);
+
+// lanIP: first non-internal IPv4 - what the phone types / the QR encodes.
+// Mirrors the helper in script/lan-server.mjs so both relays hand the
+// client a reachable address instead of forcing them to guess from the
+// browser URL bar (which is localhost when the dev server is reached via
+// 127.0.0.1).
+function lanIP() {
+  const ifaces = os.networkInterfaces();
+  const prefer = [];
+  for (const name of Object.keys(ifaces)) {
+    for (const ni of ifaces[name] || []) {
+      if (ni.family !== "IPv4" || ni.internal) continue;
+      if (/^(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(ni.address)) prefer.unshift(ni.address);
+      else prefer.push(ni.address);
+    }
+  }
+  return prefer[0] || "127.0.0.1";
+}
 const MAX_JSON_BYTES = 8 * 1024;
 const MAX_FRAME_BYTES = 64 * 1024;
 const MAX_BUFFERED_BYTES = 512 * 1024;
@@ -266,6 +286,8 @@ function handleJson(ws, room, msg) {
     room.lastActiveAt = Date.now();
     sendJson(ws, {
       t: ws.meta.role === "host" ? "hosted" : "joined",
+      ip: lanIP(),
+      port: HTTP_PORT,
       room: room.code,
       role: ws.meta.role,
       slot: ws.meta.slot,
