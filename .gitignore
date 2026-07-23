@@ -68,3 +68,8 @@ match-runtime-source/
 match-runtime-assets-source/
 script/build-match-runtime.mjs
 script/build-match-runtime-assets.mjs
+
+*.err
+*.out
+runtime-*.err
+runtime-*.out

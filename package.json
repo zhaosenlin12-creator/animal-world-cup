@@ -4,17 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "rm -rf .next && next dev -p 13000",
+    "dev": "node script/clean.mjs .next && next dev -p 13000",
     "lan": "node script/lan-server.mjs",
-    "dev:lan": "rm -rf .next && node script/lan-dev.mjs",
+    "dev:lan": "node script/clean.mjs .next && node script/lan-dev.mjs",
     "online": "node script/online-server.mjs",
-    "dev:online": "rm -rf .next && node script/online-dev.mjs",
+    "dev:online": "node script/clean.mjs .next && node script/online-dev.mjs",
     "test:online": "node script/verify-online-relay.mjs",
     "test:online:browser": "node script/verify-online-browser.mjs",
     "deploy:online": "wrangler deploy -c wrangler-online.toml",
-    "prebuild": "rm -rf .next",
+    "prebuild": "node script/clean.mjs .next",
     "build": "node script/stamp-sw-version.mjs && node script/safe-build.mjs",
-    "build:worker": "rm -rf .next .open-next && node script/stamp-sw-version.mjs && opennextjs-cloudflare build",
+    "build:worker": "node script/clean.mjs .next .open-next && node script/stamp-sw-version.mjs && opennextjs-cloudflare build",
     "start": "next start -p 13000"
   },
   "dependencies": {

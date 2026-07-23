@@ -5,6 +5,8 @@
 import { spawn } from "node:child_process";
 import os from "node:os";
 
+const NEXT_CMD = process.platform === "win32" ? "npx.cmd" : "npx";
+
 function lanIP() {
   const ifaces = os.networkInterfaces();
   for (const name of Object.keys(ifaces)) {
@@ -42,7 +44,7 @@ process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
 run("node", ["script/lan-server.mjs"], "lan", "36");
-run("npx", ["next", "dev", "-p", "13000", "-H", "0.0.0.0"], "next", "32");
+run(NEXT_CMD, ["next", "dev", "-p", "13000", "-H", "0.0.0.0"], "next", "32");
 
 const ip = lanIP();
 console.log(`\n\x1b[1m  Animal Cup — LAN ready\x1b[0m`);
