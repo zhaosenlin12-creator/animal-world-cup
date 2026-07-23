@@ -52,8 +52,9 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" translate="no" suppressHydrationWarning>
       <head>
+        <meta name="google" content="notranslate" />
         {/* Display fonts. Titan One = chunky cartoon face for the hero logo
             (Latin only); ZCOOL KuaiLe covers the CJK title fallback (动物杯);
             Baloo 2 is the rounded UI display font used across the HUD. Google
