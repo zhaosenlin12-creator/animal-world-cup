@@ -76,16 +76,21 @@
   position: absolute;
   left: max(24px, env(safe-area-inset-left));
   top: max(56px, env(safe-area-inset-top, 24px));
-  width: 30vmin;
-  max-width: 200px;
-  height: 30vmin;
-  max-height: 200px;
+  width: 32vmin;
+  max-width: 220px;
+  height: 32vmin;
+  max-height: 220px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
   border: 2px solid rgba(255, 255, 255, 0.22);
   box-shadow: inset 0 6px 22px rgba(0, 0, 0, 0.3);
   z-index: 2;
   touch-action: none;
+  transition: box-shadow 80ms ease, background 80ms ease;
+}
+.pad-stick.is-active {
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 6px 22px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
 .pad-thumb {
   position: absolute;
@@ -106,10 +111,10 @@
   position: absolute;
   left: max(24px, env(safe-area-inset-left));
   bottom: max(24px, env(safe-area-inset-bottom));
-  width: 38vmin;
-  max-width: 230px;
-  height: 38vmin;
-  max-height: 230px;
+  width: 42vmin;
+  max-width: 250px;
+  height: 42vmin;
+  max-height: 250px;
   z-index: 2;
 }
 .pad-btn {
@@ -126,7 +131,13 @@
   -webkit-tap-highlight-color: transparent;
   transition: transform 0.05s ease, filter 0.05s ease;
 }
-.pad-btn:active { transform: scale(0.9); filter: brightness(1.18); }
+.pad-btn:active { transform: scale(0.94); filter: brightness(1.18); }
+.pad-btn.is-pressed {
+  transform: scale(0.94);
+  filter: brightness(1.22);
+  box-shadow: 0 5px 13px rgba(0, 0, 0, 0.36), 0 0 0 2px rgba(255, 255, 255, 0.55);
+}
+.pad-btn--sprint.is-pressed { background: rgba(255, 255, 255, 0.18); }
 .pad-btn--lob { left: 33%; top: 0; background: #5aa0e6; }
 .pad-btn--pass { left: 0; top: 33%; background: #58c06a; }
 .pad-btn--tackle { right: 0; top: 33%; background: #e0a23c; }

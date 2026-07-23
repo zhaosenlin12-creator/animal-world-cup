@@ -45,6 +45,18 @@ export default function PadController({ room, transport = "lan", requestedSlot =
   // live continuous input (streamed); taps are sent as immediate one-offs
   const input = useRef({ vx: 0, vy: 0, shoot: false, sprint: false });
 
+  // Reliable React-driven press state (CSS :active is unreliable on
+  // mobile, so we mirror the press into a set the buttons read from for
+  // the .is-pressed visual class).
+  const [pressed, setPressed] = useState(() => new Set());
+  const [stickActive, setStickActive] = useState(false);
+  const press = (key) => setPressed((prev) => { const next = new Set(prev); next.add(key); return next; });
+  const release = (key) => setPressed((prev) => { if (!prev.has(key)) return prev; const next = new Set(prev); next.delete(key); return next; });
+
+  // Short haptic pulse so the user feels the input land. Wrapped so a
+  // missing API (or iOS Safari without user gesture) never throws.
+  const buzz = (ms) => { try { if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(ms); } catch {} };
+
   useEffect(() => {
     if (!room) { setStatus("no-room"); return undefined; }
     let resumeToken = "";
@@ -161,10 +173,13 @@ export default function PadController({ room, transport = "lan", requestedSlot =
   }
 
   function stickDown(e) {
+    if (stick.current.id !== null) return; // ignore second finger until first lifts
     const rect = baseRef.current.getBoundingClientRect();
     const s = stick.current;
     s.id = e.pointerId; s.cx = rect.left + rect.width / 2; s.cy = rect.top + rect.height / 2; s.r = rect.width / 2;
-    baseRef.current.setPointerCapture(e.pointerId);
+    try { baseRef.current.setPointerCapture(e.pointerId); } catch {}
+    setStickActive(true);
+    buzz(15);
     stickMove(e);
   }
   function stickMove(e) {
@@ -187,14 +202,31 @@ export default function PadController({ room, transport = "lan", requestedSlot =
     s.id = null;
     if (thumbRef.current) thumbRef.current.style.transform = "translate(0px,0px)";
     input.current.vx = 0; input.current.vy = 0;
+    setStickActive(false);
   }
 
   const hold = (key) => ({
-    onPointerDown: (e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); input.current[key] = true; },
-    onPointerUp: (e) => { e.preventDefault(); input.current[key] = false; },
-    onPointerCancel: () => { input.current[key] = false; },
+    onPointerDown: (e) => {
+      e.preventDefault();
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
+      input.current[key] = true;
+      press(key);
+      buzz(20);
+    },
+    onPointerUp: (e) => { e.preventDefault(); input.current[key] = false; release(key); },
+    onPointerOut: (e) => { if (e.pointerType !== "mouse") return; input.current[key] = false; release(key); },
+    onPointerCancel: () => { input.current[key] = false; release(key); },
   });
-  const tap = (key) => ({ onPointerDown: (e) => { e.preventDefault(); sendTap(key); } });
+  const tap = (key) => ({
+    onPointerDown: (e) => {
+      e.preventDefault();
+      sendTap(key);
+      press(key);
+      buzz(15);
+    },
+    onPointerUp: () => release(key),
+    onPointerCancel: () => release(key),
+  });
 
   const side = slot != null ? SIDE[slot] : null;
 
@@ -212,18 +244,18 @@ export default function PadController({ room, transport = "lan", requestedSlot =
         </span>
       </div>
 
-      <div className="pad-stick" ref={baseRef}
+      <div className={"pad-stick" + (stickActive ? " is-active" : "")} ref={baseRef}
            onPointerDown={stickDown} onPointerMove={stickMove}
            onPointerUp={stickUp} onPointerCancel={stickUp}>
         <span className="pad-thumb" ref={thumbRef} />
       </div>
 
       <div className="pad-pad">
-        <button type="button" className="pad-btn pad-btn--lob" {...tap("lob")}><LobIcon /></button>
-        <button type="button" className="pad-btn pad-btn--pass" {...tap("pass")}><PassIcon /></button>
-        <button type="button" className="pad-btn pad-btn--tackle" {...tap("tackle")}><TackleIcon /></button>
-        <button type="button" className="pad-btn pad-btn--shoot" {...hold("shoot")}><ShootIcon /></button>
-        <button type="button" className="pad-btn pad-btn--sprint" {...hold("sprint")}><SprintIcon /></button>
+        <button type="button" className={"pad-btn pad-btn--lob" + (pressed.has("lob") ? " is-pressed" : "")} {...tap("lob")}><LobIcon /></button>
+        <button type="button" className={"pad-btn pad-btn--pass" + (pressed.has("pass") ? " is-pressed" : "")} {...tap("pass")}><PassIcon /></button>
+        <button type="button" className={"pad-btn pad-btn--tackle" + (pressed.has("tackle") ? " is-pressed" : "")} {...tap("tackle")}><TackleIcon /></button>
+        <button type="button" className={"pad-btn pad-btn--shoot" + (pressed.has("shoot") ? " is-pressed" : "")} {...hold("shoot")}><ShootIcon /></button>
+        <button type="button" className={"pad-btn pad-btn--sprint" + (pressed.has("sprint") ? " is-pressed" : "")} {...hold("sprint")}><SprintIcon /></button>
       </div>
     </div>
   );
