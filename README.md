@@ -92,6 +92,7 @@ pnpm dev:lan
 ```powershell
 # 窗口 1：最新网页和横屏手柄页面
 cd C:\kaifa_senlin\soccer-game-landscape
+node script/clean.mjs .next
 pnpm.cmd exec next dev --hostname 0.0.0.0 -p 13000
 
 # 窗口 2：局域网手机手柄中继
@@ -246,6 +247,7 @@ Open two PowerShell windows:
 ```powershell
 # Window 1: latest web app and landscape controller page
 cd C:\kaifa_senlin\soccer-game-landscape
+node script/clean.mjs .next
 pnpm.cmd exec next dev --hostname 0.0.0.0 -p 13000
 
 # Window 2: LAN phone-controller relay
