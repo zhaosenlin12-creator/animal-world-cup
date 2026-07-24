@@ -81,6 +81,36 @@ pnpm dev:lan
 
 比赛在共享大屏上运行，手机扫码后作为无线手柄接入。
 
+#### Windows 当前横屏手机手柄版本（推荐）
+
+必须在包含最新横屏手柄代码的 worktree 中启动，不能在旧的稳定目录
+`C:\kaifa_senlin\soccer-game` 中启动：
+`C:\kaifa_senlin\soccer-game-landscape`。
+
+打开两个 PowerShell 窗口，分别运行：
+
+```powershell
+# 窗口 1：最新网页和横屏手柄页面
+cd C:\kaifa_senlin\soccer-game-landscape
+pnpm.cmd exec next dev --hostname 0.0.0.0 -p 13000
+
+# 窗口 2：局域网手机手柄中继
+cd C:\kaifa_senlin\soccer-game-landscape
+node script/lan-server.mjs
+```
+
+需要公网房间功能时，再打开第三个窗口运行：
+
+```powershell
+cd C:\kaifa_senlin\soccer-game-landscape
+node script/online-server.mjs
+```
+
+电脑打开 `http://localhost:13000`，同一 Wi-Fi 下手机打开
+`http://<电脑局域网 IP>:13000/lobby` 并扫描大厅二维码。当前横屏手柄布局为
+左侧摇杆、左下操作键，摇杆输入已针对手机横放方向旋转 90°；电脑局域网 IP
+可用 `ipconfig` 查看。不要用旧稳定目录启动，否则会看到未包含横屏手柄更新的版本。
+
 **公网多人对战：**
 
 ```bash
@@ -204,6 +234,38 @@ pnpm dev:lan
 
 The match runs on a shared big screen; phones scan a QR code to join as
 wireless gamepads.
+
+#### Windows current landscape phone-controller build (recommended)
+
+Run the latest build from the worktree that contains the landscape controller,
+not from the older stable checkout `C:\kaifa_senlin\soccer-game`:
+`C:\kaifa_senlin\soccer-game-landscape`.
+
+Open two PowerShell windows:
+
+```powershell
+# Window 1: latest web app and landscape controller page
+cd C:\kaifa_senlin\soccer-game-landscape
+pnpm.cmd exec next dev --hostname 0.0.0.0 -p 13000
+
+# Window 2: LAN phone-controller relay
+cd C:\kaifa_senlin\soccer-game-landscape
+node script/lan-server.mjs
+```
+
+For public-room features, open a third window:
+
+```powershell
+cd C:\kaifa_senlin\soccer-game-landscape
+node script/online-server.mjs
+```
+
+Open `http://localhost:13000` on the computer. On the same Wi-Fi, open
+`http://<computer-LAN-IP>:13000/lobby` on the phone and scan the lobby QR code.
+The current landscape controller keeps the stick on the left and the action
+buttons at lower-left, with joystick input rotated 90° for the phone's physical
+landscape orientation. Find the computer LAN IP with `ipconfig`. Do not start
+from the older stable checkout, or the phone will show the pre-landscape build.
 
 **Public online multiplayer:**
 
