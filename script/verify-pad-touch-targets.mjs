@@ -22,7 +22,7 @@ try {
   }, { timeout: 20000 }).then((handle) => handle.jsonValue());
 
   const phoneContext = await browser.newContext({
-    viewport: { width: 896, height: 414 },
+    viewport: { width: 414, height: 896 },
     deviceScaleFactor: 2,
     isMobile: true,
     hasTouch: true,
@@ -52,14 +52,16 @@ try {
       buttons.pass.right < center.left ? center.left - buttons.pass.right : buttons.pass.left - center.right,
       buttons.tackle.left > center.right ? buttons.tackle.left - center.right : center.left - buttons.tackle.right,
     ];
-    return { pad: box(".pad-pad"), buttons, minOuter: Math.min(...[buttons.lob, buttons.pass, buttons.tackle, buttons.shoot].map((button) => button.width)), minGap: Math.min(...gaps) };
+    return { stick: box(".pad-stick"), pad: box(".pad-pad"), buttons, minOuter: Math.min(...[buttons.lob, buttons.pass, buttons.tackle, buttons.shoot].map((button) => button.width)), minGap: Math.min(...gaps) };
   });
 
   await phonePage.screenshot({ path: path.join(OUT_DIR, "pad-touch-targets.png") });
-  assert.ok(layout.pad.width >= 195, `action group should be wider, received ${layout.pad.width.toFixed(1)}px`);
-  assert.ok(layout.minOuter >= 60, `outer buttons should be at least 60px, received ${layout.minOuter.toFixed(1)}px`);
-  assert.ok(layout.minGap >= 6, `center sprint button needs at least 6px clearance, received ${layout.minGap.toFixed(1)}px`);
-  console.log(`[verify-pad-touch-targets] PASS: pad=${layout.pad.width.toFixed(1)}px outer=${layout.minOuter.toFixed(1)}px gap=${layout.minGap.toFixed(1)}px`);
+  assert.ok(layout.pad.width >= 218, `action group should be wider, received ${layout.pad.width.toFixed(1)}px`);
+  assert.ok(layout.minOuter >= 68, `outer buttons should be at least 68px, received ${layout.minOuter.toFixed(1)}px`);
+  assert.ok(layout.minGap >= 7, `center sprint button needs at least 7px clearance, received ${layout.minGap.toFixed(1)}px`);
+  assert.ok(layout.stick.width >= 155, `joystick should be at least 155px, received ${layout.stick.width.toFixed(1)}px`);
+  assert.ok(layout.stick.left >= 38 && layout.stick.top >= 72, `joystick should move toward the centre, received left=${layout.stick.left.toFixed(1)}px top=${layout.stick.top.toFixed(1)}px`);
+  console.log(`[verify-pad-touch-targets] PASS: stick=${layout.stick.width.toFixed(1)}px pad=${layout.pad.width.toFixed(1)}px outer=${layout.minOuter.toFixed(1)}px gap=${layout.minGap.toFixed(1)}px`);
 } finally {
   await browser.close();
 }
