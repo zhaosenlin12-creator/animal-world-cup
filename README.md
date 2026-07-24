@@ -83,34 +83,32 @@ pnpm dev:lan
 
 #### Windows 当前横屏手机手柄版本（推荐）
 
-必须在包含最新横屏手柄代码的 worktree 中启动，不能在旧的稳定目录
-`C:\kaifa_senlin\soccer-game` 中启动：
-`C:\kaifa_senlin\soccer-game-landscape`。
+当前横屏手柄代码已经合并到主目录 `C:\kaifa_senlin\soccer-game`，请直接在该目录启动。
 
 打开两个 PowerShell 窗口，分别运行：
 
 ```powershell
 # 窗口 1：最新网页和横屏手柄页面
-cd C:\kaifa_senlin\soccer-game-landscape
+cd C:\kaifa_senlin\soccer-game
 node script/clean.mjs .next
 pnpm.cmd exec next dev --hostname 0.0.0.0 -p 13000
 
 # 窗口 2：局域网手机手柄中继
-cd C:\kaifa_senlin\soccer-game-landscape
+cd C:\kaifa_senlin\soccer-game
 node script/lan-server.mjs
 ```
 
 需要公网房间功能时，再打开第三个窗口运行：
 
 ```powershell
-cd C:\kaifa_senlin\soccer-game-landscape
+cd C:\kaifa_senlin\soccer-game
 node script/online-server.mjs
 ```
 
 电脑打开 `http://localhost:13000`，同一 Wi-Fi 下手机打开
 `http://<电脑局域网 IP>:13000/lobby` 并扫描大厅二维码。当前横屏手柄布局为
 左侧摇杆、左下操作键，摇杆输入已针对手机横放方向旋转 90°；电脑局域网 IP
-可用 `ipconfig` 查看。不要用旧稳定目录启动，否则会看到未包含横屏手柄更新的版本。
+可用 `ipconfig` 查看。每次切换版本后，先执行上面的 `node script/clean.mjs .next`，避免加载旧缓存。
 
 **公网多人对战：**
 
@@ -238,27 +236,26 @@ wireless gamepads.
 
 #### Windows current landscape phone-controller build (recommended)
 
-Run the latest build from the worktree that contains the landscape controller,
-not from the older stable checkout `C:\kaifa_senlin\soccer-game`:
-`C:\kaifa_senlin\soccer-game-landscape`.
+The landscape controller is now merged into the main checkout:
+`C:\kaifa_senlin\soccer-game`.
 
 Open two PowerShell windows:
 
 ```powershell
 # Window 1: latest web app and landscape controller page
-cd C:\kaifa_senlin\soccer-game-landscape
+cd C:\kaifa_senlin\soccer-game
 node script/clean.mjs .next
 pnpm.cmd exec next dev --hostname 0.0.0.0 -p 13000
 
 # Window 2: LAN phone-controller relay
-cd C:\kaifa_senlin\soccer-game-landscape
+cd C:\kaifa_senlin\soccer-game
 node script/lan-server.mjs
 ```
 
 For public-room features, open a third window:
 
 ```powershell
-cd C:\kaifa_senlin\soccer-game-landscape
+cd C:\kaifa_senlin\soccer-game
 node script/online-server.mjs
 ```
 
@@ -266,8 +263,9 @@ Open `http://localhost:13000` on the computer. On the same Wi-Fi, open
 `http://<computer-LAN-IP>:13000/lobby` on the phone and scan the lobby QR code.
 The current landscape controller keeps the stick on the left and the action
 buttons at lower-left, with joystick input rotated 90° for the phone's physical
-landscape orientation. Find the computer LAN IP with `ipconfig`. Do not start
-from the older stable checkout, or the phone will show the pre-landscape build.
+landscape orientation. Find the computer LAN IP with `ipconfig`. After switching
+versions, run `node script/clean.mjs .next` before starting Next so an old bundle
+cannot be reused.
 
 **Public online multiplayer:**
 
