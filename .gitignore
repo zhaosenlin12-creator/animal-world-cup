@@ -88,3 +88,26 @@ pack/app/online/
 pack/app/icon.png
 pack/app/icon.ico
 .workbuddy/
+
+# Release-upload scratch: split parts, probes, response dumps, notes drafts
+pack/parts/
+pack/parts8/
+pack/.exp-touch-app/
+pack/.diag.*
+pack/.p24.*
+pack/.rtt*
+pack/.st.*
+pack/.tus.*
+pack/.up1.*
+pack/.st2.*
+pack/.release-notes*.md
+pack/.release-patch.json
+pack/.assets-full.json
+pack/.restore-dl.tmp
+pack/upload-parts.cjs
+pack/parts/._cur.*
+pack/parts8/._cur.*
+pack/parts/manifest.json
+pack/parts/restore.cmd
+pack/parts/upload-result.json
+pack/parts8/upload-final.json
