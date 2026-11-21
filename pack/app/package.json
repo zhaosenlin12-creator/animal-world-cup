@@ -1,0 +1,49 @@
+{
+  "name": "animal-cup",
+  "version": "1.0.0",
+  "description": "动物足球 - AI 动物足球模拟器 桌面版",
+  "author": "动物足球",
+  "main": "main.cjs",
+  "private": true,
+  "build": {
+    "appId": "dev.animalcup.desktop",
+    "electronVersion": "32.2.0",
+    "productName": "动物足球",
+    "copyright": "Copyright © 2026 动物足球",
+    "directories": {
+      "output": "../dist"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "package.json",
+      "server/**/*",
+      "relay/**/*",
+      "online/**/*",
+      "icon.ico"
+    ],
+    "asar": false,
+    "npmRebuild": false,
+    "win": {
+      "icon": "icon.ico",
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "artifactName": "DongwuZuqiu-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "动物足球",
+      "deleteAppDataOnUninstall": false,
+      "installerLanguages": ["zh_CN", "en_US"]
+    },
+    "portable": {
+      "artifactName": "DongwuZuqiu-${version}-portable.${ext}"
+    }
+  }
+}

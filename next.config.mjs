@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Desktop packaging needs a self-contained server; gated behind an env flag so
+  // the normal Cloudflare/deploy build is unchanged.
+  ...(process.env.ANIMALCUP_PACK === "1" ? { output: "standalone" } : {}),
   reactStrictMode: false,
   devIndicators: false,
   // Game assets ship from /public with Next's default max-age=0,

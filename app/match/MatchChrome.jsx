@@ -215,10 +215,15 @@ export default function MatchChrome() {
     setLight(modes.includes(q) ? q : modes[Math.floor(Math.random() * modes.length)]);
     setPlay(params.get("play") === "1");
     setOnlineInput(params.get("onlineInput"));
+    // The Electron shell injects window.__desktop=true via preload: its
+    // Chromium reports maxTouchPoints>0 on a plain mouse+keyboard PC, which
+    // would wrongly enable virtual controls and swallow keyboard input.
+    const isDesktop = typeof window !== "undefined" && window.__desktop === true;
     setTouch(
-      params.get("touch") === "1" ||
-      (typeof window !== "undefined" &&
-        ("ontouchstart" in window || (navigator.maxTouchPoints || 0) > 0)),
+      !isDesktop &&
+      (params.get("touch") === "1" ||
+        (typeof window !== "undefined" &&
+          ("ontouchstart" in window || (navigator.maxTouchPoints || 0) > 0))),
     );
   }, []);
 
