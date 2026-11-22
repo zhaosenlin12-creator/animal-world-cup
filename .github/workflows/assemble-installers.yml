@@ -1,0 +1,103 @@
+name: Assemble full installers from split parts
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to reassemble
+        required: true
+        default: v1.0.0
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - name: Resolve release id
+        id: rel
+        run: |
+          set -euo pipefail
+          RID=$(gh api "repos/$REPO/releases/tags/$TAG" --jq '.id')
+          echo "rid=$RID" >> "$GITHUB_OUTPUT"
+          echo "release id = $RID"
+
+      - name: Download split parts
+        run: |
+          set -euo pipefail
+          mkdir -p parts && cd parts
+          gh release download "$TAG" --repo "$REPO" --dir .
+          echo "downloaded files:"
+          ls -1 | sort | head -50
+          echo "count = $(ls -1 | wc -l)"
+
+      - name: Reassemble the two exes
+        run: |
+          set -euo pipefail
+          cd parts
+          for name in DongwuZuqiu-Setup-1.0.0.exe DongwuZuqiu-1.0.0-portable.exe; do
+            out="$name"
+            : > "$out"
+            for i in $(seq -f "%02g" 1 18); do
+              part="$name.p$i"
+              test -f "$part" || { echo "MISSING $part"; exit 1; }
+              cat "$part" >> "$out"
+            done
+            echo "$out size = $(stat -c%s "$out")"
+          done
+
+      - name: Verify SHA-256 against originals
+        run: |
+          set -euo pipefail
+          cd parts
+          echo "668ef20dc591149e677668d6d235d742a980d45f2fe69042e0b541418901336c  DongwuZuqiu-Setup-1.0.0.exe" | sha256sum -c -
+          echo "a961d31860bc51e1c887b9bdf7001eb936d5a62f706cbbaa7621ff8be7dce08a  DongwuZuqiu-1.0.0-portable.exe" | sha256sum -c -
+          echo "SHA-256 OK for both installers"
+
+      - name: Upload the two full exes (verify before deleting anything)
+        run: |
+          set -euo pipefail
+          cd parts
+          gh release upload "$TAG" \
+            DongwuZuqiu-Setup-1.0.0.exe \
+            DongwuZuqiu-1.0.0-portable.exe \
+            --repo "$REPO" --clobber
+          echo "upload submitted"
+
+      - name: Confirm both exes are state=uploaded with correct size
+        run: |
+          set -euo pipefail
+          RID='${{ steps.rel.outputs.rid }}'
+          for attempt in $(seq 1 10); do
+            line=$(gh api "repos/$REPO/releases/$RID/assets?per_page=100" \
+              --jq '[.[] | select(.name=="DongwuZuqiu-Setup-1.0.0.exe" or .name=="DongwuZuqiu-1.0.0-portable.exe") | select(.state=="uploaded") | select(.name=="DongwuZuqiu-Setup-1.0.0.exe" and .size==143922551 or .name=="DongwuZuqiu-1.0.0-portable.exe" and .size==143561817)] | length')
+            echo "attempt $attempt: verified_full_exes=$line"
+            if [ "$line" = "2" ]; then break; fi
+            sleep 5
+          done
+          test "$line" = "2" || { echo "full exes not verified"; exit 1; }
+          echo "both full installers verified as uploaded"
+
+      - name: Remove all split parts and restore helper
+        run: |
+          set -euo pipefail
+          RID='${{ steps.rel.outputs.rid }}'
+          ids=$(gh api "repos/$REPO/releases/$RID/assets?per_page=100" \
+            --jq '.[] | select(.name != "DongwuZuqiu-Setup-1.0.0.exe" and .name != "DongwuZuqiu-1.0.0-portable.exe") | .id')
+          n=0
+          for id in $ids; do
+            gh api -X DELETE "repos/$REPO/releases/assets/$id" > /dev/null
+            n=$((n+1))
+          done
+          echo "deleted $n non-installer assets"
+
+      - name: Final asset list
+        run: |
+          RID='${{ steps.rel.outputs.rid }}'
+          gh api "repos/$REPO/releases/$RID/assets?per_page=100" \
+            --jq '.[] | "\(.name) | size=\(.size) | state=\(.state) | \(.digest)"'
