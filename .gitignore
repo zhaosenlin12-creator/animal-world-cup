@@ -111,3 +111,8 @@ pack/parts/manifest.json
 pack/parts/restore.cmd
 pack/parts/upload-result.json
 pack/parts8/upload-final.json
+
+# Release-upload scratch: token backup + local probe dumps (never tracked)
+pack/.gh-token.bak
+pack/.gh-token
+pack/.*.json
